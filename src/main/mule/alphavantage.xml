@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="edaf9e64-8593-499f-a862-7273f38a79da" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="26216fd5-4761-49a2-ad90-9ff90bfacc49">
+		<http:request-connection host="alphavantage.co" />
+	</http:request-config>
+	<flow name="alphavantageFlow" doc:id="e2f33a91-5da5-42fa-a3de-2a27d7f23033" >
+		<http:listener doc:name="Listener" doc:id="1075d1b5-5f19-4fde-a96f-603c78031b2f" config-ref="HTTP_Listener_config" path="/alpha"/>
+		<http:request method="GET" doc:name="Request" doc:id="b076a60d-5590-4a47-8d23-69455420ad87" config-ref="HTTP_Request_configuration" path="/query">
+			<http:query-params ><![CDATA[#[output application/json
+---
+{
+	"apikey" : "B0FY0Y0F5HW415AW",
+	function : "TIME_SERIES_INTRADAY",
+	interval : "15min",
+	"symbol" : attributes.queryParams.sym
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="9c31ed1e-2c7e-45eb-beb5-b0208d2aa796" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
